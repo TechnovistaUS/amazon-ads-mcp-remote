@@ -302,7 +302,7 @@ app.post('/call-tool', (req: Request, res: Response) => {
     }
 
     // Return success response
-    res.json({
+    return res.json({
       success: true,
       tool: name,
       arguments: args,
