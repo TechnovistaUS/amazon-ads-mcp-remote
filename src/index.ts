@@ -310,7 +310,7 @@ app.post('/call-tool', (req: Request, res: Response) => {
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
