@@ -38,7 +38,7 @@ app.post("/mcp/tools/call", (req, res) => {
   if (!tool) {
     return res.status(404).json({ error: `Tool ${name} not found` });
   }
-  res.json({ content: [{ type: "text", text: `${name} executed: ${JSON.stringify(args)}` }] });
+  return res.json({ content: [{ type: "text", text: `${name} executed: ${JSON.stringify(args)}` }] });
 });
 
 const PORT = process.env.PORT || 3000;
