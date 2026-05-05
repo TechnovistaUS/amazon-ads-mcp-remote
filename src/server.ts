@@ -4,11 +4,11 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', version: '2.0' });
+  res.json({ status: 'ok', version: '2.0', timestamp: new Date().toISOString() });
 });
 
 app.get('/info', (req, res) => {
-  res.json({ name: 'amazon-ads-mcp', version: '2.0', toolCount: 18 });
+  res.json({ name: 'amazon-ads-mcp', version: '2.0', toolCount: 18, deployed: true });
 });
 
 app.get('/token-status', (req, res) => {
