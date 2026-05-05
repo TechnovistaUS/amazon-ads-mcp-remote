@@ -1,8 +1,7 @@
 const express = require('express');
 
-const PORT = parseInt(process.env.PORT || '3000', 10);
-console.log('DEBUG: PORT env var:', process.env.PORT);
-console.log('DEBUG: Parsed PORT:', PORT);
+const PORT = parseInt(process.env.MCP_SERVER_PORT || '3000', 10);
+console.log('DEBUG: PORT:', PORT);
 
 const app = express();
 
