@@ -88,7 +88,8 @@ app.get("/token-status", (req, res) => {
   res.json({ tokenValid: expiresIn > 0, tokenExpiresIn: expiresIn, expiresAt: new Date(tokenExpiresAt).toISOString() });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.MCP_SERVER_PORT || process.env.PORT || 3000;
+console.error(`✅ Using PORT: ${PORT}`);
 app.listen(PORT, () => {
   console.error(`✅ MCP server running on port ${PORT}`);
 });
