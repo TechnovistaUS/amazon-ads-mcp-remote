@@ -63,7 +63,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 app.get("/mcp/sse", async (req, res) => {
   const transport = new SSEServerTransport("/mcp/messages", res);
   try {
-    await transport.start();
     await server.connect(transport);
   } catch (error) {
     console.error("SSE error:", error);
@@ -81,12 +80,15 @@ app.get("/health", (req, res) => {
 });
 
 app.get("/info", (req, res) => {
-  res.json({ name: "amazon-ads-mcp-server", version: "2.0.0", tools: 18, campaigns: 7, bidding: 11, transport: "SSE/HTTPS" });
+  res.json({ name: "amazon-ads-mcp-server", version: "2.0.0", tools: 18, status: "ready" });
 });
 
-const PORT = parseInt(process.env.MCP_SERVER_PORT || "3000", 10);
-app.listen(PORT, "0.0.0.0", () => {
-  console.error(`✅ Amazon Ads MCP Server v2.0 running on ${PORT}`);
-  console.error(`📍 SSE: http://localhost:${PORT}/mcp/sse`);
-  console.error(`🛠️  18 Tools Ready`);
+app.get("/token-status", (req, res) => {
+  const expiresIn = Math.max(0, Math.floor((tokenExpiresAt - Date.now()) / 1000));
+  res.json({ tokenValid: expiresIn > 0, tokenExpiresIn: expiresIn, expiresAt: new Date(tokenExpiresAt).toISOString() });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.error(`✅ MCP server running on port ${PORT}`);
 });
