@@ -1,0 +1,1 @@
+{"version":3,"file":"token-manager.d.ts","sourceRoot":"","sources":["../src/token-manager.ts"],"names":[],"mappings":"AAWA,wBAAsB,cAAc,IAAI,OAAO,CAAC,MAAM,CAAC,CA0CtD;AAED,wBAAgB,cAAc,IAAI;IAChC,KAAK,EAAE,OAAO,CAAC;IACf,SAAS,EAAE,MAAM,GAAG,IAAI,CAAC;IACzB,gBAAgB,EAAE,MAAM,GAAG,IAAI,CAAC;IAChC,MAAM,EAAE,MAAM,CAAC;CAChB,CAaA;AAED,wBAAgB,gBAAgB,IAAI,IAAI,CAQvC"}
