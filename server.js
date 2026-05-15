@@ -1,5 +1,5 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import express from "express";
 
@@ -17,10 +17,6 @@ const CREDENTIALS = {
   clientSecret: "amzn1.oa2-cs.v1.29b8a39598dd4621649841415efb061970bf21a77431855376a8e82e200d4cc3",
   refreshToken: "Atzr|IwEBIPSZXDZb64NxnaGgRwvKkb89kHfiuZF9L9wv0T1HPs2uWRFtKvkcLii1XSG5ek3HxDzvRz4MhYa-efDxDIk8z12w9XcVlFirDcy5IZPa9FNukKZH_VFREdwR_ocuhuP4vHjRUPo3mvrO6MUbB2wrCSFi_0TxOT6KQQKd8XAKU8s1ESTw_r5TQhJobTHV1IUm9J6DIzphQO_GXSprblV_q1-E1zQ9YFflrmaaeDN3VtJoDwSa-cd-IOU_czQapWJO9IE8qALmcZmiXz47f0nviJ5A68F0eFkZbZwY3zgnIHDLIsjpP2fPHkuTvrIYN93DSXtgZQEV4QrLBbrZ42v4Ar1ne8yOC_qCpgLmWySKdt3i_mNw4YFi31pTyWcOnm-ar3wA2nmml48fT9oof57G2wsMRc2HHDBZd0RMCcglshArxOjY9gcj1YRA9tnm5IkV2-YBjwhxaDHHyzoBP934rjXYrONQH6Gmo2hRWTKPr34lv065zZDOZlMcANkTTDu8GIvamgMGf6Nr-vcATtndJAvpk56-QOOQarLb9NHA1MLJXw"
 };
-
-const clientId = CREDENTIALS.clientId;
-const clientSecret = CREDENTIALS.clientSecret;
-const refreshToken = CREDENTIALS.refreshToken;
 
 console.error("✅ Credentials loaded");
 
@@ -60,18 +56,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   };
 });
 
-app.get("/mcp/sse", async (req, res) => {
-  const transport = new SSEServerTransport("/mcp/messages", res);
+// Streamable HTTP endpoint for remote MCP connections
+app.post("/mcp", express.json(), async (req, res) => {
+  console.error("📨 POST /mcp request received");
+  const transport = new (await import("@modelcontextprotocol/sdk/server/streamable-http.js")).StreamableHTTPServerTransport(req, res);
   try {
     await server.connect(transport);
   } catch (error) {
-    console.error("SSE error:", error);
-    if (!res.headersSent) res.status(500).json({ error: "SSE failed" });
+    console.error("Streamable HTTP error:", error);
+    if (!res.headersSent) res.status(500).json({ error: "MCP connection failed" });
   }
 });
 
-app.post("/mcp/messages", express.json(), async (req, res) => {
-  res.status(200).end();
+// Support GET for SSE announcements (optional)
+app.get("/mcp", async (req, res) => {
+  console.error("📡 GET /mcp SSE request received");
+  const transport = new (await import("@modelcontextprotocol/sdk/server/streamable-http.js")).StreamableHTTPServerTransport(req, res);
+  try {
+    await server.connect(transport);
+  } catch (error) {
+    console.error("Streamable HTTP GET error:", error);
+    if (!res.headersSent) res.status(500).json({ error: "MCP SSE failed" });
+  }
 });
 
 app.get("/health", (req, res) => {
@@ -80,16 +86,11 @@ app.get("/health", (req, res) => {
 });
 
 app.get("/info", (req, res) => {
-  res.json({ name: "amazon-ads-mcp-server", version: "2.0.0", tools: 18, status: "ready" });
-});
-
-app.get("/token-status", (req, res) => {
-  const expiresIn = Math.max(0, Math.floor((tokenExpiresAt - Date.now()) / 1000));
-  res.json({ tokenValid: expiresIn > 0, tokenExpiresIn: expiresIn, expiresAt: new Date(tokenExpiresAt).toISOString() });
+  res.json({ name: "amazon-ads-mcp-server", version: "2.0.0", tools: 18, status: "ready", transport: "streamable-http" });
 });
 
 const PORT = process.env.MCP_SERVER_PORT || process.env.PORT || 3000;
 console.error(`✅ Using PORT: ${PORT}`);
 app.listen(PORT, () => {
-  console.error(`✅ MCP server running on port ${PORT}`);
+  console.error(`✅ MCP server running on port ${PORT} with Streamable HTTP transport`);
 });
